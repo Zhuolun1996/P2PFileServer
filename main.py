@@ -14,7 +14,7 @@ if __name__ == "__main__":
     print('peer2 start')
     peer3.startPeer()
     print('peer3 start')
-    peer0.client.requestFileIndex('abc')
+    peer0.client.requestFileIndex(peer0.address, 'abc');
 
     peer0.shutdownPeer()
     print('peer0 shutdown')
