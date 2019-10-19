@@ -24,6 +24,7 @@ class SocketMessageManager:
         # Helper function to recv n bytes or return None if EOF is hit
         data = bytearray()
         while len(data) < n:
+            print(n - len(data))
             packet = sock.recv(n - len(data))
             print('recv')
             if not packet:
