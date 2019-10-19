@@ -59,14 +59,13 @@ class Server:
         self.server = ThreadedTCPServer(self.address, ThreadedTCPRequestHandler)
 
     def startServer(self):
-        with self.server:
-            # Start a thread with the server -- that thread will then start one
-            # more thread for each request
-            server_thread = threading.Thread(target=self.server.serve_forever)
-            # Exit the server thread when the main thread terminates
-            server_thread.daemon = True
-            server_thread.start()
-            print("Server " + str(self.id) + " loop running in thread:", server_thread.name)
+        # Start a thread with the server -- that thread will then start one
+        # more thread for each request
+        server_thread = threading.Thread(target=self.server.serve_forever)
+        # Exit the server thread when the main thread terminates
+        server_thread.daemon = True
+        server_thread.start()
+        print("Server " + str(self.id) + " loop running in thread:", server_thread.name)
 
     def shutdownServer(self):
         self.server.shutdown()
