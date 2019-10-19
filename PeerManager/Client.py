@@ -16,7 +16,7 @@ class Client:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.connect(address)
             SocketMessageManager.sendMessage(sock, bytes(message, 'utf-8'))
-            print("Client send: {}".format(message))
+            print("Client send: {} to {}".format(message, str(address)))
             # response = str(SocketMessageManager.recvMessage(sock), 'utf-8')
             # print("Client Received: {}".format(response))
 
