@@ -20,14 +20,14 @@ class Client:
             print("Received: {}".format(response))
 
     def getDirectoryPath(self):
-        try:
-            return Path('./Files' + str(self.id))
-        except Exception:
-            os.mkdir('./Files' + str(self.id))
-            return Path('./Files' + str(self.id))
+        return Path('./Files/' + str(self.id))
 
     def initFileIndex(self):
         directory = self.getDirectoryPath()
+        try:
+            os.open(directory)
+        except Exception:
+            os.mkdir(directory)
         for file in os.listdir(directory):
             if file.is_file():
                 self.requestUpdateFileIndex(file.name, hashlib.md5(file.read()))

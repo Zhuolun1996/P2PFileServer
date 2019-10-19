@@ -65,11 +65,7 @@ class Server:
         return self.server.server_address
 
     def getDirectoryPath(self):
-        try:
-            return Path('./Files' + str(self.id))
-        except Exception:
-            os.mkdir('./Files' + str(self.id))
-            return Path('./Files' + str(self.id))
+        return Path('./Files/' + str(self.id))
 
     def createFileIndexResponse(self, fileName):
         if self.isFileIndexServer:
