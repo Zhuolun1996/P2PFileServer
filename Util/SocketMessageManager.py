@@ -25,6 +25,7 @@ class SocketMessageManager:
         data = bytearray()
         while len(data) < n:
             packet = sock.recv(n - len(data))
+            print('recv')
             if not packet:
                 return None
             data.extend(packet)
