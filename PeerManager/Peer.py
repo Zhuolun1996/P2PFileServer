@@ -12,7 +12,7 @@ class Peer:
 
     def startPeer(self):
         self.server.startServer()
-        self.client.initFileIndex()
+        # self.client.initFileIndex()
 
     def shutdownPeer(self):
         self.server.shutdownServer()

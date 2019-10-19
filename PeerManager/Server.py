@@ -74,7 +74,7 @@ class Server:
 
             # Send the data
             message = b'Hello, world'
-            len_sent = s.send(message)
+            len_sent = s.sendall(message)
 
     def shutdownServer(self):
         self.server.shutdown()
