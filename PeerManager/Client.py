@@ -17,7 +17,8 @@ class Client:
             sock.connect(address)
             SocketMessageManager.sendMessage(sock, bytes(message, 'utf-8'))
             print("Client send: {}".format(message))
-            response = str(SocketMessageManager.recvMessage(sock), 'utf-8')
+            # response = str(SocketMessageManager.recvMessage(sock), 'utf-8')
+            response = str(sock.recv(1024), 'utf-8')
             print("Client Received: {}".format(response))
 
     def getDirectoryPath(self):
