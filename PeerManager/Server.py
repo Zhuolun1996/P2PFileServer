@@ -88,7 +88,7 @@ class Server:
                 else:
                     endIndex = len(fileContent)
                 returnContent = fileContent[startIndex:endIndex]
-                return ResponseAssembler.assembleDownloadResponse(fileName, index, chunks, hashlib.md5(returnContent),
+                return ResponseAssembler.assembleDownloadResponse(fileName, index, chunks, hashlib.md5(returnContent).hexdigest(),
                                                                   returnContent)
         except Exception:
             return ResponseAssembler.assembleErrorResponse('ResponseDownloadError')

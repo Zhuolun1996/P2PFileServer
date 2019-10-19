@@ -29,7 +29,7 @@ class Client:
         except Exception:
             os.mkdir(directory)
         for file in directory.iterdir():
-            self.requestUpdateFileIndex(file.name, hashlib.md5(file.read_bytes()))
+            self.requestUpdateFileIndex(file.name, hashlib.md5(file.read_bytes()).hexdigest())
 
     def requestFileIndex(self, fileName):
         self.sendMessage(DNSServer.getFileIndexServerAddress(),
