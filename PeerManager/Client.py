@@ -16,8 +16,9 @@ class Client:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.connect(address)
             sock.sendall(bytes(message, 'utf-8'))
-            response = str(sock.recv(1024), 'utf-8')
-            print("Received: {}".format(response))
+            print("Client send: {}".format(message))
+            response = str(sock.recv(), 'utf-8')
+            print("Client Received: {}".format(response))
 
     def getDirectoryPath(self):
         return Path('./Files/' + str(self.id))

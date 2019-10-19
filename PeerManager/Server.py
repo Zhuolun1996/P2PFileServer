@@ -10,8 +10,10 @@ from pathlib import Path
 class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
     def handle(self):
         data = self.request.recv()
+        print("Server Received: {}".format(data))
         response = self.processRequest(json.load(data))
         self.request.sendall(response)
+        print("Server send: {}".format(response))
 
     def processRequest(self, request, server):
         requestHead = request['head']
@@ -88,7 +90,8 @@ class Server:
                 else:
                     endIndex = len(fileContent)
                 returnContent = fileContent[startIndex:endIndex]
-                return ResponseAssembler.assembleDownloadResponse(fileName, index, chunks, hashlib.md5(returnContent).hexdigest(),
+                return ResponseAssembler.assembleDownloadResponse(fileName, index, chunks,
+                                                                  hashlib.md5(returnContent).hexdigest(),
                                                                   returnContent)
         except Exception:
             return ResponseAssembler.assembleErrorResponse('ResponseDownloadError')
