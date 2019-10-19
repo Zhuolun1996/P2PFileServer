@@ -7,34 +7,43 @@ from MessageAssembler.ResponseAssembler import ResponseAssembler
 from pathlib import Path
 
 
+# class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
+#     def handle(self):
+#         data = str(SocketMessageManager.recvMessage(self.request), 'utf-8')
+#         print("Server Received: {}".format(data))
+#         response = self.processRequest(json.load(data), self.server)
+#         SocketMessageManager.sendMessage(self.request, bytes(response, 'utf-8'))
+#         print("Server send: {}".format(response))
+#
+#     def processRequest(self, request, server):
+#         requestHead = request['head']
+#         if requestHead == 'FileIndexRequest':
+#             fileName = request['fileName']
+#             return server.createFileIndexResponse(fileName)
+#         elif requestHead == 'DownloadRequest':
+#             fileName = request['fileName']
+#             index = request['index']
+#             chunks = request['chunks']
+#             return server.createDownloadResponse(fileName, index, chunks)
+#         elif requestHead == 'UpdateFileIndexRequest':
+#             fileName = request['fileName']
+#             fileMd5 = request['fileMd5']
+#             peerId = request['peerId']
+#             return server.createFileIndexResponse(fileName, fileMd5, peerId)
+#
+#
+# class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+#     pass
 class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
+
     def handle(self):
-        data = str(SocketMessageManager.recvMessage(self.request), 'utf-8')
-        print("Server Received: {}".format(data))
-        response = self.processRequest(json.load(data), self.server)
-        SocketMessageManager.sendMessage(self.request, bytes(response, 'utf-8'))
-        print("Server send: {}".format(response))
-
-    def processRequest(self, request, server):
-        requestHead = request['head']
-        if requestHead == 'FileIndexRequest':
-            fileName = request['fileName']
-            return server.createFileIndexResponse(fileName)
-        elif requestHead == 'DownloadRequest':
-            fileName = request['fileName']
-            index = request['index']
-            chunks = request['chunks']
-            return server.createDownloadResponse(fileName, index, chunks)
-        elif requestHead == 'UpdateFileIndexRequest':
-            fileName = request['fileName']
-            fileMd5 = request['fileMd5']
-            peerId = request['peerId']
-            return server.createFileIndexResponse(fileName, fileMd5, peerId)
-
+        data = str(self.request.recv(1024), 'ascii')
+        cur_thread = threading.current_thread()
+        response = bytes("{}: {}".format(cur_thread.name, data), 'ascii')
+        self.request.sendall(response)
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
-
 
 class Server:
     def __init__(self, id, name, host, port, isFileIndexServer=False):
@@ -53,7 +62,7 @@ class Server:
             # more thread for each request
             server_thread = threading.Thread(target=self.server.serve_forever)
             # Exit the server thread when the main thread terminates
-            # server_thread.daemon = True
+            server_thread.daemon = True
             server_thread.start()
             print("Server loop running in thread:", server_thread.name)
 
