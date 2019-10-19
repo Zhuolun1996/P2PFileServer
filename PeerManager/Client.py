@@ -11,7 +11,6 @@ class Client:
     def __init__(self, id, name):
         self.id = id
         self.name = name
-        self.initFileIndex()
 
     def sendMessage(self, address, message):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
