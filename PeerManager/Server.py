@@ -9,10 +9,10 @@ from pathlib import Path
 
 class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
     def handle(self):
-        data = SocketMessageManager.recvMessage(self.request)
+        data = str(SocketMessageManager.recvMessage(self.request), 'utf-8')
         print("Server Received: {}".format(data))
         response = self.processRequest(json.load(data), self.server)
-        SocketMessageManager.sendMessage(self.request, response)
+        SocketMessageManager.sendMessage(self.request, bytes(response, 'utf-8'))
         print("Server send: {}".format(response))
 
     def processRequest(self, request, server):
