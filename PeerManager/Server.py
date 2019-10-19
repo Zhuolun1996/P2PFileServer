@@ -1,18 +1,18 @@
-import os
 import threading
 import socketserver
 import hashlib
 import json
+from Util.SocketMessageManager import SocketMessageManager
 from MessageAssembler.ResponseAssembler import ResponseAssembler
 from pathlib import Path
 
 
 class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
     def handle(self):
-        data = self.request.recv()
+        data = SocketMessageManager.recvMessage(self.request)
         print("Server Received: {}".format(data))
-        response = self.processRequest(json.load(data))
-        self.request.sendall(response)
+        response = self.processRequest(json.load(data), self.server)
+        SocketMessageManager.sendMessage(self.request, response)
         print("Server send: {}".format(response))
 
     def processRequest(self, request, server):

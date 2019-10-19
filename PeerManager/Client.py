@@ -1,6 +1,7 @@
 import os
 import socket
 import hashlib
+from Util.SocketMessageManager import SocketMessageManager
 from MessageAssembler.RequestAssembler import RequestAssembler
 from DNSManager.DNSServer import DNSServer
 from pathlib import Path
@@ -15,9 +16,9 @@ class Client:
     def sendMessage(self, address, message):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.connect(address)
-            sock.sendall(bytes(message, 'utf-8'))
+            SocketMessageManager.sendMessage(sock, message)
             print("Client send: {}".format(message))
-            response = str(sock.recv(), 'utf-8')
+            response = SocketMessageManager.recvMessage(sock)
             print("Client Received: {}".format(response))
 
     def getDirectoryPath(self):
