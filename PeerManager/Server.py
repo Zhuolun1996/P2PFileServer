@@ -67,14 +67,8 @@ class Server:
             # Exit the server thread when the main thread terminates
             server_thread.daemon = True
             server_thread.start()
+            print(self.server.server_address)
             print("Server " + str(self.id) + " loop running in thread:", server_thread.name)
-
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect(('localhost', 8000))
-
-            # Send the data
-            message = b'Hello, world'
-            len_sent = s.sendall(message)
 
     def shutdownServer(self):
         self.server.shutdown()
