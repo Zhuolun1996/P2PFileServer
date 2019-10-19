@@ -34,8 +34,7 @@ class Client:
         except Exception:
             os.mkdir(directory)
         for file in self.listFiles(directory):
-            if file.is_file():
-                self.requestUpdateFileIndex(file.name, hashlib.md5(file.read()))
+            self.requestUpdateFileIndex(file.name, hashlib.md5(file.read()))
 
     def requestFileIndex(self, fileName):
         self.sendMessage(DNSServer.getFileIndexServerAddress(),
