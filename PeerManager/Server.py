@@ -66,11 +66,11 @@ class Server:
             # Exit the server thread when the main thread terminates
             server_thread.daemon = True
             server_thread.start()
-            print("Server " + self.id + " loop running in thread:", server_thread.name)
+            print("Server " + str(self.id) + " loop running in thread:", server_thread.name)
 
     def shutdownServer(self):
         self.server.shutdown()
-        print("Server" + self.id + " shutdown")
+        print("Server" + str(self.id) + " shutdown")
 
     def getServer(self):
         return self.server
