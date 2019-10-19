@@ -22,13 +22,18 @@ class Client:
     def getDirectoryPath(self):
         return Path('./Files/' + str(self.id))
 
+    def listFiles(self, path):
+        for file in os.listdir(path):
+            if os.path.isfile(os.path.join(path, file)):
+                yield file
+
     def initFileIndex(self):
         directory = self.getDirectoryPath()
         try:
             directory.exists()
         except Exception:
             os.mkdir(directory)
-        for file in os.listdir(directory):
+        for file in self.listFiles(directory):
             if file.is_file():
                 self.requestUpdateFileIndex(file.name, hashlib.md5(file.read()))
 
