@@ -10,6 +10,7 @@ class Client:
     def __init__(self, id, name):
         self.id = id
         self.name = name
+        self.initFileIndex()
 
     def sendMessage(self, address, message):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -20,10 +21,10 @@ class Client:
 
     def getDirectoryPath(self):
         try:
-            return Path('./' + self.id)
+            return Path('./Files' + self.id)
         except Exception:
-            os.mkdir('./' + self.id)
-            return Path('./' + self.id)
+            os.mkdir('./Files' + self.id)
+            return Path('./Files' + self.id)
 
     def initFileIndex(self):
         directory = self.getDirectoryPath()
