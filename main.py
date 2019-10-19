@@ -1,7 +1,7 @@
 from PeerManager.Peer import Peer
 
 if __name__ == "__main__":
-    peer0 = Peer(0, 'peer0', 'localhost', 8000)
+    peer0 = Peer(0, 'peer0', 'localhost', 8000, True)
     peer1 = Peer(1, 'peer1', 'localhost', 8001)
     peer2 = Peer(2, 'peer2', 'localhost', 8002)
     peer3 = Peer(3, 'peer3', 'localhost', 8003)
