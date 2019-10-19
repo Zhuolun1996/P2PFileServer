@@ -25,7 +25,8 @@ class Client:
     def initFileIndex(self):
         directory = self.getDirectoryPath()
         try:
-            os.open(directory)
+            directory.open('r')
+            directory.close()
         except Exception:
             os.mkdir(directory)
         for file in os.listdir(directory):
