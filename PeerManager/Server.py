@@ -42,8 +42,10 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         response = bytes("{}: {}".format(cur_thread.name, data), 'ascii')
         self.request.sendall(response)
 
+
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
+
 
 class Server:
     def __init__(self, id, name, host, port, isFileIndexServer=False):
@@ -64,10 +66,11 @@ class Server:
             # Exit the server thread when the main thread terminates
             server_thread.daemon = True
             server_thread.start()
-            print("Server loop running in thread:", server_thread.name)
+            print("Server " + self.id + " loop running in thread:", server_thread.name)
 
     def shutdownServer(self):
         self.server.shutdown()
+        print("Server" + self.id + " shutdown")
 
     def getServer(self):
         return self.server
