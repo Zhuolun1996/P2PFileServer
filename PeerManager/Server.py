@@ -1,6 +1,7 @@
 import threading
 import socketserver
 import hashlib
+import socket
 import json
 from Util.SocketMessageManager import SocketMessageManager
 from MessageAssembler.ResponseAssembler import ResponseAssembler
@@ -59,13 +60,21 @@ class Server:
         self.server = ThreadedTCPServer(self.address, ThreadedTCPRequestHandler)
 
     def startServer(self):
-        # Start a thread with the server -- that thread will then start one
-        # more thread for each request
-        server_thread = threading.Thread(target=self.server.serve_forever)
-        # Exit the server thread when the main thread terminates
-        server_thread.daemon = True
-        server_thread.start()
-        print("Server " + str(self.id) + " loop running in thread:", server_thread.name)
+        with self.server:
+            # Start a thread with the server -- that thread will then start one
+            # more thread for each request
+            server_thread = threading.Thread(target=self.server.serve_forever)
+            # Exit the server thread when the main thread terminates
+            server_thread.daemon = True
+            server_thread.start()
+            print("Server " + str(self.id) + " loop running in thread:", server_thread.name)
+
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect(('localhost', 8000))
+
+            # Send the data
+            message = b'Hello, world'
+            len_sent = s.send(message)
 
     def shutdownServer(self):
         self.server.shutdown()
