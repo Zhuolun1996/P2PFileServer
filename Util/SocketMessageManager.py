@@ -11,7 +11,7 @@ class SocketMessageManager:
 
     @staticmethod
     def recvMessage(sock):
-        # Read message length and unpack it into an integer
+        # Read message length and unpasendMessageck it into an integer
         rawMessageLength = SocketMessageManager.recvAll(sock, 4)
         if not rawMessageLength:
             return None
@@ -24,9 +24,7 @@ class SocketMessageManager:
         # Helper function to recv n bytes or return None if EOF is hit
         data = bytearray()
         while len(data) < n:
-            print(n - len(data))
             packet = sock.recv(n - len(data))
-            print('recv')
             if not packet:
                 return None
             data.extend(packet)

@@ -1,6 +1,6 @@
 class DNSServer:
     @staticmethod
     def getFileIndexServerAddress():
-        ip = 'localhost'
+        ip = '127.0.0.1'
         port = 8000
         return ip, port

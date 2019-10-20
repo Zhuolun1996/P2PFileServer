@@ -26,3 +26,11 @@ class RequestAssembler:
         request['fileMd5'] = fileMd5
         request['peerId'] = peerId
         return json.dumps(request)
+
+    @staticmethod
+    def assembleUpdatePeerAddressRequest(peerId, address):
+        request = dict()
+        request['head'] = 'UpdatePeerAddressRequest'
+        request['peerId'] = peerId
+        request['address'] = address
+        return json.dumps(request)

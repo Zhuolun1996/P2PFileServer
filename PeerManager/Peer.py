@@ -2,17 +2,18 @@ from PeerManager.Client import Client
 from PeerManager.Server import Server
 
 
-class Peer:
+class Peer(Server, Client):
     def __init__(self, id, name, host, port, isFileIndexServer=False):
         self.id = id
         self.name = name
         self.address = (host, port)
-        self.server = Server(id, name, host, port, isFileIndexServer)
-        self.client = Client(id, name)
+        Server.__init__(self, id, name, host, port, isFileIndexServer)
+        Client.__init__(self, id, name, host, port)
 
     def startPeer(self):
-        self.server.startServer()
-        # self.client.initFileIndex()
+        self.startServer()
+        self.initPeerAddress()
+        self.initFileIndex()
 
     def shutdownPeer(self):
-        self.server.shutdownServer()
+        self.shutdownServer()

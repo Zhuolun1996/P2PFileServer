@@ -33,6 +33,15 @@ class ResponseAssembler:
         return json.dumps(response)
 
     @staticmethod
+    def assembleUpdatePeerAddressResponse(PeerId, address, result):
+        response = dict()
+        response['head'] = 'UpdatePeerAddressResponse'
+        response['PeerId'] = PeerId
+        response['address'] = address
+        response['result'] = result
+        return json.dumps(response)
+
+    @staticmethod
     def assembleErrorResponse(errorBody):
         response = dict()
         response['head'] = 'errorResponse'
