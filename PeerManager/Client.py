@@ -7,7 +7,6 @@ from collections import Counter
 from ast import literal_eval
 from Util.SocketMessageManager import SocketMessageManager
 from MessageAssembler.RequestAssembler import RequestAssembler
-from DNSManager.DNSServer import DNSServer
 from Util.statisticHelper import statisticHelper
 from pathlib import Path
 from Util.downloadThread import downloadThread
@@ -64,29 +63,29 @@ class Client:
 
     def requestFileIndex(self, fileName):
         if (self.isCentralized):
-            indexServerAddress = DNSServer.getFileIndexServerAddress()
+            indexServerAddress = self.dnsServer.getFileIndexServerAddress()
         else:
-            indexServerAddress = self.cachedIndexServer
-        return self.sendMessage(indexServerAddress[1],
-                                    RequestAssembler.assembleFileIndexRequest(fileName))
+            indexServerAddress = self.cachedIndexServer[1]
+        return self.sendMessage(indexServerAddress,
+                                RequestAssembler.assembleFileIndexRequest(fileName))
 
     def requestDownloadFile(self, fileName, index, chunks, targetPeerAddress):
         return self.sendMessage(targetPeerAddress, RequestAssembler.assembleDownloadRequest(fileName, index, chunks))
 
     def requestUpdateFileIndex(self, fileName, fileMd5):
         if (self.isCentralized):
-            indexServerAddress = DNSServer.getFileIndexServerAddress()
+            indexServerAddress = self.dnsServer.getFileIndexServerAddress()
         else:
-            indexServerAddress = self.cachedIndexServer
-        return self.sendMessage(indexServerAddress[1],
+            indexServerAddress = self.cachedIndexServer[1]
+        return self.sendMessage(indexServerAddress,
                                 RequestAssembler.assembleUpdateFileIndexRequest(fileName, fileMd5, self.id))
 
     def requestUpdatePeerAddress(self):
         if (self.isCentralized):
-            indexServerAddress = DNSServer.getFileIndexServerAddress()
+            indexServerAddress = self.dnsServer.getFileIndexServerAddress()
         else:
-            indexServerAddress = self.cachedIndexServer
-        return self.sendMessage(indexServerAddress[1],
+            indexServerAddress = self.cachedIndexServer[1]
+        return self.sendMessage(indexServerAddress,
                                 RequestAssembler.assembleUpdatePeerAddressRequest(self.id, self.address))
 
     def requestJoinNetwork(self, dnsServer):

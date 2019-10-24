@@ -4,10 +4,11 @@ from DNSManager.DNSServer import DNSServer
 
 if __name__ == "__main__":
     dnsServer = DNSServer()
-    peer0 = Peer(0, 'peer0', '127.0.0.1', 8000, dnsServer)
-    peer1 = Peer(1, 'peer1', '127.0.0.1', 8001, dnsServer)
-    peer2 = Peer(2, 'peer2', '127.0.0.1', 8002, dnsServer)
-    peer3 = Peer(3, 'peer3', '127.0.0.1', 8003, dnsServer)
+    isCentralized = False
+    peer0 = Peer(0, 'peer0', '127.0.0.1', 8000, dnsServer, False, isCentralized)
+    peer1 = Peer(1, 'peer1', '127.0.0.1', 8001, dnsServer, False, isCentralized)
+    peer2 = Peer(2, 'peer2', '127.0.0.1', 8002, dnsServer, False, isCentralized)
+    peer3 = Peer(3, 'peer3', '127.0.0.1', 8003, dnsServer, False, isCentralized)
 
     peer0.startPeer()
     peer1.startPeer()
