@@ -141,7 +141,7 @@ class Client:
                 downloadThread(self, fileName, i, chunks, tuple(literal_eval(peerSet.pop()[1])), cachedFileChunks))
             fileChunks.append(None)
         for _thread in downloadThreadList:
-            _thread.run()
+            _thread.start()
         for _thread in downloadThreadList:
             _thread.join()
         print(cachedFileChunks)
