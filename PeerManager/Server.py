@@ -4,7 +4,9 @@ import hashlib
 import json
 import traceback
 import socket
+import time
 from Util.SocketMessageManager import SocketMessageManager
+from Util.statisticHelper import statisticHelper
 from MessageAssembler.ResponseAssembler import ResponseAssembler
 from pathlib import Path
 
@@ -12,12 +14,18 @@ from pathlib import Path
 class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
 
     def handle(self):
-        data = str(SocketMessageManager.recvMessage(self.request), 'utf-8')
+        data = str(SocketMessageManager.recvMessage(self.request, self.server.getP2PServer().messageSent,
+                                                    self.server.getP2PServer().bytesSent), 'utf-8')
+        startTime = time.time()
         print("Server {} Received: {}".format(self.server.getP2PServer().id, data))
         response = self.processRequest(json.loads(data), self.server.getP2PServer())
         self.request.settimeout(0.5)
         try:
-            SocketMessageManager.sendMessage(self.request, bytes(response, 'utf-8'))
+            SocketMessageManager.sendMessage(self.request, bytes(response, 'utf-8'),
+                                             self.server.getP2PServer().messageSent,
+                                             self.server.getP2PServer().bytesSent)
+            statisticHelper.computeAverageResponseTime(startTime, self.server.getP2PServer().avgResponseTime,
+                                            self.server.getP2PServer().messageSent)
         except socket.timeout:
             print("Peer {} timeout".format(self.request.address))
         print("Server {} send: {}".format(self.server.getP2PServer().id, response))
@@ -58,7 +66,8 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 
 class Server:
-    def __init__(self, id, name, address, peerList, dnsServer, cachedIndexServer, isFileIndexServer):
+    def __init__(self, id, name, address, peerList, dnsServer, cachedIndexServer, messageSent, messageReceived,
+                 bytesSent, bytesReceived, avgResponseTime, isFileIndexServer):
         self.id = id
         self.name = name
         self.address = address
@@ -66,6 +75,11 @@ class Server:
         self.dnsServer = dnsServer
         self.cachedIndexServer = cachedIndexServer
         self.isFileIndexServer = isFileIndexServer
+        self.messageSent = messageSent
+        self.messageReceived = messageReceived
+        self.bytesSent = bytesSent
+        self.bytesReceived = bytesReceived
+        self.avgResponseTime = avgResponseTime
         self.fileIndexTable = dict()
         self.peerFileTable = dict()
         self.fileMd5Table = dict()

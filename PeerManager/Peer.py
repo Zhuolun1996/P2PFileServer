@@ -10,8 +10,17 @@ class Peer(Server, Client):
         self.peerList = list()
         self.cachedIndexServer = None
         self.dnsServer = dnsServer
-        Server.__init__(self, id, name, self.address, self.peerList, dnsServer, self.cachedIndexServer, isFileIndexServer)
-        Client.__init__(self, id, name, self.address, self.peerList, dnsServer, self.cachedIndexServer, isFileIndexServer)
+        self.messageSent = [0]
+        self.messageReceived = [0]
+        self.bytesSent = [0]
+        self.bytesReceived = [0]
+        self.avgResponseTime = [0]
+        Server.__init__(self, id, name, self.address, self.peerList, dnsServer, self.cachedIndexServer,
+                        self.messageSent, self.messageReceived, self.bytesSent, self.bytesReceived,
+                        self.avgResponseTime, isFileIndexServer)
+        Client.__init__(self, id, name, self.address, self.peerList, dnsServer, self.cachedIndexServer,
+                        self.messageSent, self.messageReceived, self.bytesSent, self.bytesReceived,
+                        self.avgResponseTime, isFileIndexServer)
 
     def startPeer(self):
         self.startServer()
@@ -22,3 +31,10 @@ class Peer(Server, Client):
 
     def shutdownPeer(self):
         self.shutdownServer()
+
+    def printStatistic(self):
+        print('Peer {} Message Sent: {}'.format(self.id, self.messageSent[0]))
+        print('Peer {} Message Received: {}'.format(self.id, self.messageSent[0]))
+        print('Peer {} Bytes Sent: {}'.format(self.id, self.messageSent[0]))
+        print('Peer {} Bytes Received: {}'.format(self.id, self.messageSent[0]))
+        print('Peer {} Average Response Time: {}'.format(self.id, self.messageSent[0]))

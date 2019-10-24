@@ -2,32 +2,47 @@ import os
 import socket
 import hashlib
 import json
+import time
 from collections import Counter
 from ast import literal_eval
 from Util.SocketMessageManager import SocketMessageManager
 from MessageAssembler.RequestAssembler import RequestAssembler
 from DNSManager.DNSServer import DNSServer
+from Util.statisticHelper import statisticHelper
 from pathlib import Path
+from Util.downloadThread import downloadThread
 
 
 class Client:
-    def __init__(self, id, name, address, peerList, dnsServer, cachedIndexServer, isFileIndexServer):
+    def __init__(self, id, name, address, peerList, dnsServer, cachedIndexServer, messageSent, messageReceived,
+                 bytesSent, bytesReceived, avgResponseTime, isFileIndexServer):
         self.id = id
         self.name = name
         self.address = address
         self.peerList = peerList
         self.dnsServer = dnsServer
         self.cachedIndexServer = cachedIndexServer
+        self.messageSent = messageSent
+        self.messageReceived = messageReceived
+        self.bytesSent = bytesSent
+        self.bytesReceived = bytesReceived
+        self.avgResponseTime = avgResponseTime
         self.isFileIndexServer = isFileIndexServer
 
     def sendMessage(self, address, message):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.connect(address)
-            SocketMessageManager.sendMessage(sock, bytes(message, 'utf-8'))
+            try:
+                SocketMessageManager.sendMessage(sock, bytes(message, 'utf-8'), self.messageSent, self.bytesSent)
+                startTime = time.time()
+            except:
+                raise Exception('sent message fail')
             print("Client {} send: {} to {}".format(self.id, message, str(address)))
             sock.settimeout(0.5)
             try:
-                response = str(SocketMessageManager.recvMessage(sock), 'utf-8')
+                response = str(SocketMessageManager.recvMessage(sock, self.messageReceived, self.bytesReceived),
+                               'utf-8')
+                statisticHelper.computeAverageResponseTime(startTime, self.avgResponseTime, self.messageSent)
             except socket.timeout:
                 print("Peer {} timeout".format(address))
             print("Client {} Received: {}".format(self.id, response))
@@ -118,16 +133,24 @@ class Client:
 
     def downloadFromPeers(self, fileName, fileMd5, chunks, peerSet, targetFilePath):
         print('start download')
-        fileChunks = []
+        cachedFileChunks = list()
+        downloadThreadList = list()
+        fileChunks = list()
         for i in range(0, len(peerSet)):
-            print('download {} piece'.format(i))
-            response = json.loads(
-                self.requestDownloadFile(fileName, i, chunks, tuple(literal_eval(peerSet.pop()[1]))))
+            downloadThreadList.append(
+                downloadThread(self, fileName, i, chunks, tuple(literal_eval(peerSet.pop()[1])), cachedFileChunks))
+            fileChunks.append(None)
+        for _thread in downloadThreadList:
+            _thread.run()
+        for _thread in downloadThreadList:
+            _thread.join()
+        print(cachedFileChunks)
+        for cachedChunk in cachedFileChunks:
+            response = json.loads(cachedChunk)
             if response['head'] == 'errorResponse':
                 raise Exception('downloadFileException')
             else:
-                fileChunks.append(bytes(response['fileContent'], 'utf-8'))
-        print(fileChunks)
+                fileChunks[int(response['index'])] = bytes(response['fileContent'], 'utf-8')
         with targetFilePath.open('wb') as file:
             for item in fileChunks:
                 file.write(item)
