@@ -34,3 +34,25 @@ class RequestAssembler:
         request['peerId'] = peerId
         request['address'] = address
         return json.dumps(request)
+
+    @staticmethod
+    def assembleFindIndexServerRequest():
+        request = dict()
+        request['head'] = 'FindIndexServerRequest'
+        return json.dumps(request)
+
+    @staticmethod
+    def assembleJoinPeerNetworkRequest(peerId, address):
+        request = dict()
+        request['head'] = 'JoinPeerNetworkRequest'
+        request['peerId'] = peerId
+        request['address'] = address
+        return json.dumps(request)
+
+    @staticmethod
+    def assembleIndexServerHealthCheckRequest(peerId, address):
+        request = dict()
+        request['head'] = 'IndexServerHealthCheckRequest'
+        request['peerId'] = peerId
+        request['address'] = address
+        return json.dumps(request)

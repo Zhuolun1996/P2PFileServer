@@ -3,6 +3,7 @@ import socketserver
 import hashlib
 import json
 import traceback
+import socket
 from Util.SocketMessageManager import SocketMessageManager
 from MessageAssembler.ResponseAssembler import ResponseAssembler
 from pathlib import Path
@@ -14,7 +15,11 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         data = str(SocketMessageManager.recvMessage(self.request), 'utf-8')
         print("Server {} Received: {}".format(self.server.getP2PServer().id, data))
         response = self.processRequest(json.loads(data), self.server.getP2PServer())
-        SocketMessageManager.sendMessage(self.request, bytes(response, 'utf-8'))
+        self.request.settimeout(0.5)
+        try:
+            SocketMessageManager.sendMessage(self.request, bytes(response, 'utf-8'))
+        except socket.timeout:
+            print("Peer {} timeout".format(self.request.address))
         print("Server {} send: {}".format(self.server.getP2PServer().id, response))
 
     def processRequest(self, request, server):
@@ -36,6 +41,12 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
             peerId = request['peerId']
             address = request['address']
             return server.createUpdatePeerAddressResponse(peerId, address)
+        elif requestHead == 'JoinPeerNetworkRequest':
+            peerId = request['peerId']
+            address = request['address']
+            return server.createJoinPeerNetworkResponse(peerId, address)
+        elif requestHead == 'FindIndexServerRequest':
+            return server.createFindIndexServerResponse()
 
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
@@ -47,10 +58,13 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 
 class Server:
-    def __init__(self, id, name, host, port, isFileIndexServer=False):
+    def __init__(self, id, name, address, peerList, dnsServer, cachedIndexServer, isFileIndexServer):
         self.id = id
         self.name = name
-        self.address = (host, port)
+        self.address = address
+        self.peerList = peerList
+        self.dnsServer = dnsServer
+        self.cachedIndexServer = cachedIndexServer
         self.isFileIndexServer = isFileIndexServer
         self.fileIndexTable = dict()
         self.peerFileTable = dict()
@@ -58,6 +72,7 @@ class Server:
         self.peerAddressTable = dict()
         self.server = ThreadedTCPServer(self.address, ThreadedTCPRequestHandler)
         self.server.setup(self)
+        self.peerList = list()
 
     def startServer(self):
         # Start a thread with the server -- that thread will then start one
@@ -106,7 +121,7 @@ class Server:
                 returnContent = fileContent[startIndex:endIndex]
                 return ResponseAssembler.assembleDownloadResponse(fileName, index, chunks,
                                                                   hashlib.md5(returnContent).hexdigest(),
-                                                                  str(returnContent,'utf-8'))
+                                                                  str(returnContent, 'utf-8'))
         except Exception:
             traceback.print_exc()
             return ResponseAssembler.assembleErrorResponse('ResponseDownloadError')
@@ -138,3 +153,18 @@ class Server:
             return ResponseAssembler.assembleUpdatePeerAddressResponse(peerId, address, True)
         except:
             return ResponseAssembler.assembleErrorResponse('updatePeerAddressError')
+
+    def createJoinPeerNetworkResponse(self, peerId, address):
+        try:
+            self.peerList.append((peerId, address))
+            return ResponseAssembler.assembleJoinPeerNetworkResponse(peerId, address, True)
+        except:
+            return ResponseAssembler.assembleErrorResponse('joinPeerNetworkError')
+
+    def createFindIndexServerResponse(self):
+        if self.cachedIndexServer != None:
+            return ResponseAssembler.assembleFindIndexServerResponse(self.cachedIndexServer[0],
+                                                                     self.cachedIndexServer[1], True)
+        else:
+            return ResponseAssembler.assembleFindIndexServerResponse(self.cachedIndexServer[0],
+                                                                     self.cachedIndexServer[1], False)

@@ -42,6 +42,31 @@ class ResponseAssembler:
         return json.dumps(response)
 
     @staticmethod
+    def assembleFindIndexServerResponse(PeerId, address, result):
+        response = dict()
+        response['head'] = 'FindIndexServerResponse'
+        response['PeerId'] = PeerId
+        response['address'] = address
+        response['result'] = result
+        return json.dumps(response)
+
+    @staticmethod
+    def assembleJoinPeerNetworkResponse(PeerId, address, result):
+        response = dict()
+        response['head'] = 'JoinPeerNetworkResponse'
+        response['PeerId'] = PeerId
+        response['address'] = address
+        response['result'] = result
+        return json.dumps(response)
+
+    @staticmethod
+    def assembleIndexServerHealthCheckResponse(result):
+        response = dict()
+        response['head'] = 'IndexServerHealthCheckResponse'
+        response['result'] = result
+        return json.dumps(response)
+
+    @staticmethod
     def assembleErrorResponse(errorBody):
         response = dict()
         response['head'] = 'errorResponse'
