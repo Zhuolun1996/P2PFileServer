@@ -3,7 +3,7 @@ from PeerManager.Server import Server
 
 
 class Peer(Server, Client):
-    def __init__(self, id, name, host, port, dnsServer, isFileIndexServer=False):
+    def __init__(self, id, name, host, port, dnsServer, isFileIndexServer=False, isCentralized=False):
         self.id = id
         self.name = name
         self.address = (host, port)
@@ -15,12 +15,13 @@ class Peer(Server, Client):
         self.bytesSent = [0]
         self.bytesReceived = [0]
         self.avgResponseTime = [0]
+        self.isCentralized = isCentralized
         Server.__init__(self, id, name, self.address, self.peerList, dnsServer, self.cachedIndexServer,
                         self.messageSent, self.messageReceived, self.bytesSent, self.bytesReceived,
-                        self.avgResponseTime, isFileIndexServer)
+                        self.avgResponseTime, isFileIndexServer, isCentralized)
         Client.__init__(self, id, name, self.address, self.peerList, dnsServer, self.cachedIndexServer,
                         self.messageSent, self.messageReceived, self.bytesSent, self.bytesReceived,
-                        self.avgResponseTime, isFileIndexServer)
+                        self.avgResponseTime, isFileIndexServer, isCentralized)
 
     def startPeer(self):
         self.startServer()

@@ -15,7 +15,7 @@ from Util.downloadThread import downloadThread
 
 class Client:
     def __init__(self, id, name, address, peerList, dnsServer, cachedIndexServer, messageSent, messageReceived,
-                 bytesSent, bytesReceived, avgResponseTime, isFileIndexServer):
+                 bytesSent, bytesReceived, avgResponseTime, isFileIndexServer, isCentralized):
         self.id = id
         self.name = name
         self.address = address
@@ -28,6 +28,7 @@ class Client:
         self.bytesReceived = bytesReceived
         self.avgResponseTime = avgResponseTime
         self.isFileIndexServer = isFileIndexServer
+        self.isCentralized = isCentralized
 
     def sendMessage(self, address, message):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -62,18 +63,30 @@ class Client:
         return self.requestUpdatePeerAddress()
 
     def requestFileIndex(self, fileName):
-        return self.sendMessage(DNSServer.getFileIndexServerAddress(),
-                                RequestAssembler.assembleFileIndexRequest(fileName))
+        if (self.isCentralized):
+            indexServerAddress = DNSServer.getFileIndexServerAddress()
+        else:
+            indexServerAddress = self.cachedIndexServer
+        return self.sendMessage(indexServerAddress[1],
+                                    RequestAssembler.assembleFileIndexRequest(fileName))
 
     def requestDownloadFile(self, fileName, index, chunks, targetPeerAddress):
         return self.sendMessage(targetPeerAddress, RequestAssembler.assembleDownloadRequest(fileName, index, chunks))
 
     def requestUpdateFileIndex(self, fileName, fileMd5):
-        return self.sendMessage(DNSServer.getFileIndexServerAddress(),
+        if (self.isCentralized):
+            indexServerAddress = DNSServer.getFileIndexServerAddress()
+        else:
+            indexServerAddress = self.cachedIndexServer
+        return self.sendMessage(indexServerAddress[1],
                                 RequestAssembler.assembleUpdateFileIndexRequest(fileName, fileMd5, self.id))
 
     def requestUpdatePeerAddress(self):
-        return self.sendMessage(DNSServer.getFileIndexServerAddress(),
+        if (self.isCentralized):
+            indexServerAddress = DNSServer.getFileIndexServerAddress()
+        else:
+            indexServerAddress = self.cachedIndexServer
+        return self.sendMessage(indexServerAddress[1],
                                 RequestAssembler.assembleUpdatePeerAddressRequest(self.id, self.address))
 
     def requestJoinNetwork(self, dnsServer):

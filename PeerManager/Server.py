@@ -25,7 +25,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                                              self.server.getP2PServer().messageSent,
                                              self.server.getP2PServer().bytesSent)
             statisticHelper.computeAverageResponseTime(startTime, self.server.getP2PServer().avgResponseTime,
-                                            self.server.getP2PServer().messageSent)
+                                                       self.server.getP2PServer().messageSent)
         except socket.timeout:
             print("Peer {} timeout".format(self.request.address))
         print("Server {} send: {}".format(self.server.getP2PServer().id, response))
@@ -67,7 +67,7 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 class Server:
     def __init__(self, id, name, address, peerList, dnsServer, cachedIndexServer, messageSent, messageReceived,
-                 bytesSent, bytesReceived, avgResponseTime, isFileIndexServer):
+                 bytesSent, bytesReceived, avgResponseTime, isFileIndexServer, isCentralized):
         self.id = id
         self.name = name
         self.address = address
@@ -80,6 +80,7 @@ class Server:
         self.bytesSent = bytesSent
         self.bytesReceived = bytesReceived
         self.avgResponseTime = avgResponseTime
+        self.isCentralized = isCentralized
         self.fileIndexTable = dict()
         self.peerFileTable = dict()
         self.fileMd5Table = dict()
@@ -182,3 +183,9 @@ class Server:
         else:
             return ResponseAssembler.assembleFindIndexServerResponse(self.cachedIndexServer[0],
                                                                      self.cachedIndexServer[1], False)
+
+    def quitIndexServer(self):
+        self.isFileIndexServer = False
+
+    def quitP2PNetwork(self):
+        pass
