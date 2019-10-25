@@ -15,9 +15,9 @@ if __name__ == "__main__":
     peer2.startPeer()
     peer3.startPeer()
     try:
-        print(peer0.cachedIndexServer, peer1.cachedIndexServer, peer2.cachedIndexServer)
-        peer1.requestFileIndex('abc')
-        peer2.downloadFile('abc')
+        # peer1.requestFileIndex('abc')
+        print(peer0.fileMd5Table)
+        peer3.downloadFile('abc')
     finally:
         peer0.printStatistic()
         peer1.printStatistic()

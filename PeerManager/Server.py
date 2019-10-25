@@ -131,6 +131,9 @@ class Server:
                     endIndex = startIndex + chunkSize
                 else:
                     endIndex = len(fileContent)
+                if index == chunks - 1:
+                    endIndex = len(fileContent)
+                print('request file chunk: ', index)
                 print('file Length: ', len(fileContent))
                 print('download piece: ', startIndex, endIndex)
                 returnContent = fileContent[startIndex:endIndex]
