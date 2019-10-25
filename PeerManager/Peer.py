@@ -8,7 +8,7 @@ class Peer(Server, Client):
         self.name = name
         self.address = (host, port)
         self.peerList = list()
-        self.cachedIndexServer = None
+        self.cachedIndexServer = [0]
         self.dnsServer = dnsServer
         self.messageSent = [0]
         self.messageReceived = [0]
@@ -38,7 +38,7 @@ class Peer(Server, Client):
 
     def printStatistic(self):
         print('Peer {} Message Sent: {}'.format(self.id, self.messageSent[0]))
-        print('Peer {} Message Received: {}'.format(self.id, self.messageSent[0]))
-        print('Peer {} Bytes Sent: {}'.format(self.id, self.messageSent[0]))
-        print('Peer {} Bytes Received: {}'.format(self.id, self.messageSent[0]))
-        print('Peer {} Average Response Time: {}'.format(self.id, self.messageSent[0]))
+        print('Peer {} Message Received: {}'.format(self.id, self.messageReceived[0]))
+        print('Peer {} Bytes Sent: {}'.format(self.id, self.bytesSent[0]))
+        print('Peer {} Bytes Received: {}'.format(self.id, self.bytesReceived[0]))
+        print('Peer {} Average Response Time: {}'.format(self.id, self.avgResponseTime[0]))

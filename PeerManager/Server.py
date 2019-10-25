@@ -177,15 +177,12 @@ class Server:
             return ResponseAssembler.assembleErrorResponse('joinPeerNetworkError')
 
     def createFindIndexServerResponse(self):
-        if self.cachedIndexServer != None:
-            return ResponseAssembler.assembleFindIndexServerResponse(self.cachedIndexServer[0],
-                                                                     self.cachedIndexServer[1], True)
+        if self.cachedIndexServer[0] != 0:
+            return ResponseAssembler.assembleFindIndexServerResponse(self.cachedIndexServer[0][0],
+                                                                     self.cachedIndexServer[0][1], True)
         else:
-            return ResponseAssembler.assembleFindIndexServerResponse(self.cachedIndexServer[0],
-                                                                     self.cachedIndexServer[1], False)
+            return ResponseAssembler.assembleFindIndexServerResponse(self.cachedIndexServer[0][0],
+                                                                     self.cachedIndexServer[0][1], False)
 
     def quitIndexServer(self):
         self.isFileIndexServer = False
-
-    def quitP2PNetwork(self):
-        pass

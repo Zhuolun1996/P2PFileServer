@@ -65,7 +65,7 @@ class Client:
         if (self.isCentralized):
             indexServerAddress = self.dnsServer.getFileIndexServerAddress()
         else:
-            indexServerAddress = self.cachedIndexServer[1]
+            indexServerAddress = self.cachedIndexServer[0][1]
         return self.sendMessage(indexServerAddress,
                                 RequestAssembler.assembleFileIndexRequest(fileName))
 
@@ -76,7 +76,7 @@ class Client:
         if (self.isCentralized):
             indexServerAddress = self.dnsServer.getFileIndexServerAddress()
         else:
-            indexServerAddress = self.cachedIndexServer[1]
+            indexServerAddress = self.cachedIndexServer[0][1]
         return self.sendMessage(indexServerAddress,
                                 RequestAssembler.assembleUpdateFileIndexRequest(fileName, fileMd5, self.id))
 
@@ -84,7 +84,7 @@ class Client:
         if (self.isCentralized):
             indexServerAddress = self.dnsServer.getFileIndexServerAddress()
         else:
-            indexServerAddress = self.cachedIndexServer[1]
+            indexServerAddress = self.cachedIndexServer[0][1]
         return self.sendMessage(indexServerAddress,
                                 RequestAssembler.assembleUpdatePeerAddressRequest(self.id, self.address))
 
@@ -105,14 +105,17 @@ class Client:
             responseList.append(json.loads(self.requestIndexServerFromPeer(peerInfo[1])))
         indexServerCounter = Counter()
         for response in responseList:
-            if response['head'] == 'FindIndexServerResponse' and response['result'] == 'True':
-                indexServerCounter[response['address']] += 1
+            if response['head'] == 'FindIndexServerResponse' and response['result'] == True:
+                indexServerCounter[str((response['PeerId'],response['address']))] += 1
         if len(indexServerCounter) > 0:
-            self.cachedIndexServer = tuple(literal_eval(sorted(indexServerCounter)[0]))
-        if self.cachedIndexServer == 'None' or self.cachedIndexServer == None:
-            self.cachedIndexServer = (self.id, self.address)
+            _cachedAddress = list(literal_eval(sorted(indexServerCounter)[0]))
+            _cachedAddress[1] = tuple(_cachedAddress[1])
+            _cachedAddress = tuple(_cachedAddress)
+            self.cachedIndexServer[0] = _cachedAddress
+        else:
+            self.cachedIndexServer[0] = (self.id, self.address)
             self.isFileIndexServer = True
-        print('Update Cached Index Server to {}'.format(self.cachedIndexServer))
+        print('Update Cached Index Server to {}'.format(self.cachedIndexServer[0]))
 
     def requestIndexServerFromPeer(self, address):
         return self.sendMessage(address, RequestAssembler.assembleFindIndexServerRequest())
@@ -153,6 +156,7 @@ class Client:
                 downloadThread(self, fileName, i, chunks, tuple(literal_eval(peerSet.pop()[1])), cachedFileChunks))
             fileChunks.append(None)
         for _thread in downloadThreadList:
+            print('Start download with {}'.format(_thread.name))
             _thread.start()
         for _thread in downloadThreadList:
             _thread.join()
