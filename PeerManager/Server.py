@@ -25,7 +25,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         '''
         data = str(SocketMessageManager.recvMessage(self.request, self.server.getP2PServer().messageSent,
                                                     self.server.getP2PServer().bytesSent), 'utf-8')
-        startTime = time.time_ns() // 1000000
+        startTime = time.time() * 1000
         if self.server.getP2PServer().output == 'debug':
             print("Server {} Received: {}".format(self.server.getP2PServer().id, data))
         response = self.processRequest(json.loads(data), self.server.getP2PServer())
