@@ -29,17 +29,17 @@ def main():
     dnsServer = DNSServer()
     try:
         if (CENTRALIZED):
-            indexServer = Peer(10000, 'indexServer', '127.0.0.1', 10000, dnsServer, True, CENTRALIZED, False, OUTPUT)
+            indexServer = Peer(10000, 'indexServer', '127.0.0.1', 60000, dnsServer, True, CENTRALIZED, False, OUTPUT)
             indexServer.startPeer(FILES, LENGTH)
 
         for i in range(0, PEERS):
             peerList.append(
-                Peer(i, 'peer' + str(i), '127.0.0.1', 8000 + i, dnsServer, False, CENTRALIZED, False, OUTPUT))
+                Peer(i, 'peer' + str(i), '127.0.0.1', 50000 + i, dnsServer, False, CENTRALIZED, False, OUTPUT))
 
         for peer in peerList:
             peer.startPeer(FILES, LENGTH)
 
-        testPeer = Peer(1000, 'testPeer', '127.0.0.1', 9000, dnsServer, False, CENTRALIZED, True, OUTPUT)
+        testPeer = Peer(1000, 'testPeer', '127.0.0.1', 51000, dnsServer, False, CENTRALIZED, True, OUTPUT)
         testPeer.startPeer(FILES, LENGTH)
 
         for i in range(REQUESTS):
