@@ -15,7 +15,7 @@ class testData:
         return statistics.mean(self.messageReceivedData)
 
     def getAvgBytesSentData(self):
-        return statistics.mean(self.bytesReceivedData)
+        return statistics.mean(self.bytesSentData)
 
     def getAvgBytesReceivedData(self):
         return statistics.mean(self.bytesReceivedData)
