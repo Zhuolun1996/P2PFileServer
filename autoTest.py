@@ -85,7 +85,7 @@ def makePlot(plotData, name):
     plt.plot(np.arange(1, len(plotData) + 1), plotData, label=name)
     plt.legend()
 
-    plt.savefig('./plots/' + name + '.png')
+    plt.savefig('./Plots/' + name + '.png')
 
 
 parameters = [4, 2, 1, 10, 'T', 5, 'false']
