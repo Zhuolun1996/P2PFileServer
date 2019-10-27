@@ -220,7 +220,7 @@ class Client:
         Send request to download a file pieces from peers, reassemble and write to disk
         Download file from the peers which have the files in multi threads
         Reassemble file chunks by the index and save to the disk
-        Verify downloaded file by comapring downloaded file's md5 and original file's md5
+        Verify downloaded file by comparing downloaded file's md5 and original file's md5
         :param fileName: file name
         :param fileMd5: file md5
         :param chunks: number of chunks
@@ -235,9 +235,11 @@ class Client:
             downloadThreadList.append(
                 downloadThread(self, fileName, i, chunks, tuple(literal_eval(peerSet.pop()[1])), cachedFileChunks))
             fileChunks.append(None)
+        # Start download threads
         for _thread in downloadThreadList:
             print('Start download with {}'.format(_thread.name))
             _thread.start()
+        # Wait until all threads finished
         for _thread in downloadThreadList:
             _thread.join()
         if self.output == 'clean' or self.output == 'debug':

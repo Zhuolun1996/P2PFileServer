@@ -3,6 +3,7 @@ import time
 import statistics
 from PeerManager.Peer import Peer
 from DNSManager.DNSServer import DNSServer
+from Util.testData import testData
 
 
 def main():
@@ -69,17 +70,18 @@ def main():
         testPeer.printStatistic()
         testPeer.recordStatistic(messageSentData, messageReceivedData, bytesSentData, bytesReceivedData,
                                  avgResponseTimeData)
-        avgMessageSent = statistics.mean(messageSentData)
-        avgMessageReceived = statistics.mean(messageReceivedData)
-        avgBytesSent = statistics.mean(bytesSentData)
-        avgBytesReceived = statistics.mean(bytesReceivedData)
-        avgTotalResponseTime = statistics.mean(avgResponseTimeData)
+        data = testData(messageSentData, messageReceivedData, bytesSentData, bytesReceivedData, avgResponseTimeData)
+        avgMessageSent = data.getAvgMessageSentData()
+        avgMessageReceived = data.getAvgMessageReceivedData()
+        avgBytesSent = data.getAvgBytesSentData()
+        avgBytesReceived = data.getAvgBytesReceivedData()
+        avgTotalResponseTime = data.getAvgAvgResponseTimeData()
 
         print('average message sent: {}'.format(avgMessageSent))
         print('average message received: {}'.format(avgMessageReceived))
         print('average bytes sent: {}'.format(avgBytesSent))
         print('average bytes received: {}'.format(avgBytesReceived))
-        print('average response time: {} miliseconds'.format(avgTotalResponseTime))
+        print('average response time: {} milliseconds'.format(avgTotalResponseTime))
 
         for peer in peerList:
             peer.shutdownPeer()
