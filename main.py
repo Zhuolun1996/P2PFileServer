@@ -1,5 +1,6 @@
 import argparse
 import time
+import statistics
 from PeerManager.Peer import Peer
 from DNSManager.DNSServer import DNSServer
 
@@ -52,10 +53,31 @@ def main():
         print('wait until OS release ports')
 
     finally:
+        messageSentData = list()
+        messageReceivedData = list()
+        bytesSentData = list()
+        bytesReceivedData = list()
+        avgResponseTimeData = list()
         if (CENTRALIZED):
             indexServer.printStatistic()
+            indexServer.recordStatistic(messageSentData, messageReceivedData, bytesSentData, bytesReceivedData,
+                                        avgResponseTimeData)
         for peer in peerList:
             peer.printStatistic()
+            peer.recordStatistic(messageSentData, messageReceivedData, bytesSentData, bytesReceivedData,
+                                 avgResponseTimeData)
+        avgMessageSent = statistics.mean(messageSentData)
+        avgMessageReceived = statistics.mean(messageReceivedData)
+        avgBytesSent = statistics.mean(bytesSentData)
+        avgBytesReceived = statistics.mean(bytesReceivedData)
+        avgTotalResponseTime = statistics.mean(avgResponseTimeData)
+
+        print('average message sent: ', avgMessageSent)
+        print('average message received: ', avgMessageReceived)
+        print('average bytes sent: ', avgBytesSent)
+        print('average bytes received: ', avgBytesReceived)
+        print('average response time: ', avgTotalResponseTime)
+
         for peer in peerList:
             peer.shutdownPeer()
         if (CENTRALIZED):
