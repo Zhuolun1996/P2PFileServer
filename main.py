@@ -66,17 +66,20 @@ def main():
             peer.printStatistic()
             peer.recordStatistic(messageSentData, messageReceivedData, bytesSentData, bytesReceivedData,
                                  avgResponseTimeData)
+        testPeer.printStatistic()
+        testPeer.recordStatistic(messageSentData, messageReceivedData, bytesSentData, bytesReceivedData,
+                                 avgResponseTimeData)
         avgMessageSent = statistics.mean(messageSentData)
         avgMessageReceived = statistics.mean(messageReceivedData)
         avgBytesSent = statistics.mean(bytesSentData)
         avgBytesReceived = statistics.mean(bytesReceivedData)
         avgTotalResponseTime = statistics.mean(avgResponseTimeData)
 
-        print('average message sent: ', avgMessageSent)
-        print('average message received: ', avgMessageReceived)
-        print('average bytes sent: ', avgBytesSent)
-        print('average bytes received: ', avgBytesReceived)
-        print('average response time: ', avgTotalResponseTime)
+        print('average message sent: {}'.format(avgMessageSent))
+        print('average message received: {}'.format(avgMessageReceived))
+        print('average bytes sent: {}'.format(avgBytesSent))
+        print('average bytes received: {}'.format(avgBytesReceived))
+        print('average response time: {} miliseconds'.format(avgTotalResponseTime))
 
         for peer in peerList:
             peer.shutdownPeer()
