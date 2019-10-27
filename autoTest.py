@@ -49,7 +49,6 @@ def autoTest(parameters):
             testPeer.downloadFile(str(i % FILES))
             time.sleep(1 / FREQUENCY)
 
-
         for peer in peerList:
             peer.recordStatistic(messageSentData, messageReceivedData, bytesSentData, bytesReceivedData,
                                  avgResponseTimeData)
@@ -61,11 +60,11 @@ def autoTest(parameters):
 
         data = testData(messageSentData, messageReceivedData, bytesSentData, bytesReceivedData, avgResponseTimeData)
 
-        makePlot(data.messageSentData, 'message sent' + str(parameters), CENTRALIZED)
-        makePlot(data.messageReceivedData, 'message received' + str(parameters), CENTRALIZED)
-        makePlot(data.bytesSentData, 'bytes sent' + str(parameters), CENTRALIZED)
-        makePlot(data.bytesReceivedData, 'bytes received' + str(parameters), CENTRALIZED)
-        makePlot(data.avgResponseTimeData, 'average time' + str(parameters), CENTRALIZED)
+        makePlot(data.messageSentData, 'message sent' + str(parameters))
+        makePlot(data.messageReceivedData, 'message received' + str(parameters))
+        makePlot(data.bytesSentData, 'bytes sent' + str(parameters))
+        makePlot(data.bytesReceivedData, 'bytes received' + str(parameters))
+        makePlot(data.avgResponseTimeData, 'average time' + str(parameters))
 
         print('avg message sent: ', data.getAvgMessageSentData())
         print('avg message recv: ', data.getAvgMessageReceivedData())
@@ -85,12 +84,12 @@ def autoTest(parameters):
         testPeer.shutdownPeer()
 
 
-def makePlot(plotData, name, isCentralized):
+def makePlot(plotData, name):
     plt.figure()
-    plt.plot(np.arange(1, len(plotData)+1), plotData, label=name)
+    plt.plot(np.arange(1, len(plotData) + 1), plotData, label=name)
     plt.legend()
-    plt.savefig(name + '.png')
 
+    plt.savefig('./plots/' + name + '.png')
 
 
 parameters = [4, 2, 1, 10, 'T', 5, 'false']
