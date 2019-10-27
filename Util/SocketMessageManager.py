@@ -2,7 +2,9 @@ import struct
 
 
 class SocketMessageManager:
-
+    '''
+    Socket message manager
+    '''
     @staticmethod
     def sendMessage(sock, msg, messageSentSum, bytesSentSum):
         # Prefix each message with a 4-byte length (network byte order)
@@ -14,7 +16,7 @@ class SocketMessageManager:
     @staticmethod
     def recvMessage(sock,
                     messageReceivedSum, bytesReceivedSum):
-        # Read message length and unpasendMessageck it into an integer
+        # Read message length
         rawMessageLength = SocketMessageManager.recvAll(sock, 4)
         if not rawMessageLength:
             return None

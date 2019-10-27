@@ -13,6 +13,9 @@ from Util.downloadThread import downloadThread
 
 
 class Client:
+    '''
+    Client class
+    '''
     def __init__(self, id, name, address, peerList, dnsServer, cachedIndexServer, messageSent, messageReceived,
                  bytesSent, bytesReceived, avgResponseTime, isFileIndexServer, isCentralized, isTest, output):
         self.id = id
@@ -32,6 +35,12 @@ class Client:
         self.output = output
 
     def sendMessage(self, address, message):
+        '''
+        Send message and listening for the response
+        :param address: address
+        :param message: message
+        :return: response
+        '''
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.connect(address)
             try:
@@ -56,6 +65,10 @@ class Client:
         return Path('./Files/' + str(self.id))
 
     def initFileIndex(self):
+        '''
+        Send request to update index server's file index
+        :return:
+        '''
         if not Path('./Files/').exists():
             os.mkdir(Path('./Files/'))
         directory = self.getDirectoryPath()
@@ -65,9 +78,18 @@ class Client:
             self.requestUpdateFileIndex(file.name, hashlib.md5(file.read_bytes()).hexdigest())
 
     def initPeerAddress(self):
+        '''
+        Send request to update index server's peer list
+        :return: update peer address response
+        '''
         return self.requestUpdatePeerAddress()
 
     def requestFileIndex(self, fileName):
+        '''
+        Send request to request for a file's index information
+        :param fileName: file name
+        :return: file index response
+        '''
         if self.isCentralized:
             indexServerAddress = self.dnsServer.getFileIndexServerAddress()
         else:
@@ -76,9 +98,23 @@ class Client:
                                 RequestAssembler.assembleFileIndexRequest(fileName))
 
     def requestDownloadFile(self, fileName, index, chunks, targetPeerAddress):
+        '''
+        Send request to download a file with specified index and chunks
+        :param fileName: file name
+        :param index: index to be downloaded
+        :param chunks: number of chunks
+        :param targetPeerAddress: taget peer address
+        :return: download response
+        '''
         return self.sendMessage(targetPeerAddress, RequestAssembler.assembleDownloadRequest(fileName, index, chunks))
 
     def requestUpdateFileIndex(self, fileName, fileMd5):
+        '''
+        Send request to update index server's file index
+        :param fileName: file name
+        :param fileMd5: file md5
+        :return:
+        '''
         if self.isCentralized:
             indexServerAddress = self.dnsServer.getFileIndexServerAddress()
         else:
@@ -87,6 +123,10 @@ class Client:
                                 RequestAssembler.assembleUpdateFileIndexRequest(fileName, fileMd5, self.id))
 
     def requestUpdatePeerAddress(self):
+        '''
+        Send request to index server's update peer list
+        :return: update peer address response
+        '''
         if self.isCentralized:
             indexServerAddress = self.dnsServer.getFileIndexServerAddress()
         else:
@@ -95,6 +135,11 @@ class Client:
                                 RequestAssembler.assembleUpdatePeerAddressRequest(self.id, self.address))
 
     def requestJoinNetwork(self, dnsServer):
+        '''
+        Send request to update other peer and dnsServer's peer list
+        :param dnsServer: dnsServer
+        :return: join peer network response
+        '''
         peerList = dnsServer.getPeerList()
         dnsServer.getPeerList().append((self.id, self.address))
         for peerInfo in peerList:
@@ -106,6 +151,11 @@ class Client:
         return self.sendMessage(peerInfo[1], RequestAssembler.assembleJoinPeerNetworkRequest(self.id, self.address))
 
     def requestFindIndexServer(self):
+        '''
+        Send request to acquire current index server in the network
+        Cached index server will be set to the current network's index server by majority vote
+        :return: find index server response
+        '''
         responseList = list()
         for peerInfo in self.peerList:
             responseList.append(json.loads(self.requestIndexServerFromPeer(peerInfo[1])))
@@ -128,6 +178,12 @@ class Client:
         return self.sendMessage(address, RequestAssembler.assembleFindIndexServerRequest())
 
     def downloadFile(self, fileName):
+        '''
+        Request target file's file index from index server
+        Request to download target file
+        :param fileName: file name
+        :return:
+        '''
         rawResponse = self.requestFileIndex(fileName)
         response = json.loads(rawResponse)
         if response['head'] == 'FileIndexResponse':
@@ -136,6 +192,13 @@ class Client:
             self.requestFindIndexServer()
 
     def processDownloadResponse(self, response):
+        '''
+        Analyse file index response
+        Request to download target file
+        Stop download if already has the file
+        :param response:
+        :return:
+        '''
         fileName = response['fileName']
         fileMd5 = response['fileMd5']
         chunks = response['chunks']
@@ -153,6 +216,18 @@ class Client:
             self.downloadFromPeers(fileName, fileMd5, chunks, peerSet, targetFilePath)
 
     def downloadFromPeers(self, fileName, fileMd5, chunks, peerSet, targetFilePath):
+        '''
+        Send request to download a file pieces from peers, reassemble and write to disk
+        Download file from the peers which have the files in multi threads
+        Reassemble file chunks by the index and save to the disk
+        Verify downloaded file by comapring downloaded file's md5 and original file's md5
+        :param fileName: file name
+        :param fileMd5: file md5
+        :param chunks: number of chunks
+        :param peerSet: peers have the file
+        :param targetFilePath: save destination
+        :return:
+        '''
         cachedFileChunks = list()
         downloadThreadList = list()
         fileChunks = list()

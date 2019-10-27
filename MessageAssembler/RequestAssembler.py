@@ -2,6 +2,9 @@ import json
 
 
 class RequestAssembler:
+    '''
+    Request assembler
+    '''
     @staticmethod
     def assembleFileIndexRequest(fileName):
         request = dict()

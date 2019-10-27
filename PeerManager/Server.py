@@ -15,7 +15,14 @@ from pathlib import Path
 
 class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
 
+    '''
+    Handler to process TCP connection
+    '''
     def handle(self):
+        '''
+        Process coming in TCP message and send response
+        :return:
+        '''
         data = str(SocketMessageManager.recvMessage(self.request, self.server.getP2PServer().messageSent,
                                                     self.server.getP2PServer().bytesSent), 'utf-8')
         startTime = time.time()
@@ -34,7 +41,14 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         if self.server.getP2PServer().output == 'debug':
             print("Server {} send: {}".format(self.server.getP2PServer().id, response))
 
+
     def processRequest(self, request, server):
+        '''
+        Create response based on the request head
+        :param request: request
+        :param server: P2PServer
+        :return:
+        '''
         requestHead = request['head']
         if requestHead == 'FileIndexRequest':
             fileName = request['fileName']
@@ -70,6 +84,9 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 
 class Server:
+    '''
+    Server class
+    '''
     def __init__(self, id, name, address, peerList, dnsServer, cachedIndexServer, messageSent, messageReceived,
                  bytesSent, bytesReceived, avgResponseTime, isFileIndexServer, isCentralized, isTest, output):
         self.id = id
@@ -105,6 +122,12 @@ class Server:
         print("Server " + str(self.id) + " loop running in thread:", server_thread.name)
 
     def shutdownServer(self):
+        '''
+        Shutdown server
+        stop listening
+        release resources
+        :return:
+        '''
         self.server.shutdown()
         print("Server" + str(self.id) + " shutdown")
 
@@ -118,6 +141,12 @@ class Server:
         return Path('./Files/' + str(self.id))
 
     def initFiles(self, num, length):
+        '''
+        Create files for peers (for test only)
+        :param num: number of files
+        :param length: each file length
+        :return:
+        '''
         for i in range(0, num):
             if not self.getDirectoryPath().exists():
                 os.mkdir(self.getDirectoryPath())
@@ -125,6 +154,10 @@ class Server:
                 file.write(bytes(('Peer test File' + str(i)) * length, 'utf-8'))
 
     def cleanFileDirectory(self):
+        '''
+        Clean file directory
+        :return:
+        '''
         try:
             shutil.rmtree(self.getDirectoryPath())
             print('clean directory success')
@@ -132,6 +165,11 @@ class Server:
             print('clean directory fail')
 
     def createFileIndexResponse(self, fileName):
+        '''
+        Create response for file index request
+        :param fileName: file name
+        :return: file index response
+        '''
         if self.isFileIndexServer:
             peerSet = self.fileIndexTable[fileName]
             fileMd5 = self.fileMd5Table[fileName]
@@ -141,6 +179,13 @@ class Server:
             return ResponseAssembler.assembleErrorResponse('ResponseFileIndexError')
 
     def createDownloadResponse(self, fileName, index, chunks):
+        '''
+        Create response for download request
+        :param fileName: file name
+        :param index: index
+        :param chunks: chunks
+        :return: download response
+        '''
         try:
             with self.getDirectoryPath().joinpath(fileName).open('rb') as file:
                 fileContent = file.read()
@@ -167,6 +212,13 @@ class Server:
             return ResponseAssembler.assembleErrorResponse('ResponseDownloadError')
 
     def createUpdateFileIndexResponse(self, fileName, fileMd5, peerId):
+        '''
+        Create response for update file index request
+        :param fileName: file name
+        :param fileMd5: file md5
+        :param peerId: peer id
+        :return: update file index response
+        '''
         try:
             try:
                 self.fileIndexTable[fileName].add((peerId, str(self.peerAddressTable[peerId])))
@@ -189,6 +241,12 @@ class Server:
             return ResponseAssembler.assembleErrorResponse('updateFileIndexError')
 
     def createUpdatePeerAddressResponse(self, peerId, address):
+        '''
+        Create response for update peer address response
+        :param peerId: peer id
+        :param address: peer address
+        :return: update peer address response
+        '''
         try:
             self.peerAddressTable[peerId] = address
             return ResponseAssembler.assembleUpdatePeerAddressResponse(peerId, address, True)
@@ -196,6 +254,12 @@ class Server:
             return ResponseAssembler.assembleErrorResponse('updatePeerAddressError')
 
     def createJoinPeerNetworkResponse(self, peerId, address):
+        '''
+        Create response for join peer network request
+        :param peerId: peer id
+        :param address: peer address
+        :return: join peer network response
+        '''
         try:
             self.peerList.append((peerId, address))
             return ResponseAssembler.assembleJoinPeerNetworkResponse(peerId, address, True)
@@ -203,6 +267,10 @@ class Server:
             return ResponseAssembler.assembleErrorResponse('joinPeerNetworkError')
 
     def createFindIndexServerResponse(self):
+        '''
+        Create response for find index server request
+        :return: find index server response
+        '''
         if self.cachedIndexServer[0] != 0:
             return ResponseAssembler.assembleFindIndexServerResponse(self.cachedIndexServer[0][0],
                                                                      self.cachedIndexServer[0][1], True)

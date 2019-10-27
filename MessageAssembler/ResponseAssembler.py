@@ -2,6 +2,9 @@ import json
 
 
 class ResponseAssembler:
+    '''
+    Response assembler
+    '''
     @staticmethod
     def assembleFileIndexResponse(fileName, fileMd5, chunks, peerSet):
         response = dict()
