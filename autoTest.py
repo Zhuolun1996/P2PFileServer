@@ -13,7 +13,7 @@ def autoTest(parameters):
         FILES = parameters[1]
         REQUESTS = parameters[2]
         FREQUENCY = parameters[3]
-        CENTRALIZED = parameters[4]
+        CENTRALIZED = parameters[4] == 'T'
         LENGTH = parameters[5]
         OUTPUT = parameters[6]
 

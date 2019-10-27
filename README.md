@@ -9,8 +9,8 @@ This project would simulate message transmission in P2PNetwork
 -M, --files, Number of Files assigned to each peer, e.g. 10  
 -N, --requests, Number of requests to download a file in simulation, e.g. 3  
 -F, --frequency, The frequency to submit download request, e.g. 10 --> wait 0.1 miliseconds between two requests  
--C, --centralized, Run in centralized mode, e.g. T --> will run in centralized mode, otherwise, decentrazlied mode  
 -L, --length, File length, e.g. 10  
+-C, --centralized, Run in centralized mode, e.g. T --> will run in centralized mode, otherwise, decentrazlied mode  
 -O, --output, Output mode, `clean` || `debug` || `false`  
 
 ###Example
