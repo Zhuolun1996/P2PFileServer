@@ -1,3 +1,4 @@
+import os
 import threading
 import socketserver
 import hashlib
@@ -5,6 +6,7 @@ import json
 import traceback
 import socket
 import time
+import shutil
 from Util.SocketMessageManager import SocketMessageManager
 from Util.statisticHelper import statisticHelper
 from MessageAssembler.ResponseAssembler import ResponseAssembler
@@ -110,6 +112,17 @@ class Server:
 
     def getDirectoryPath(self):
         return Path('./Files/' + str(self.id))
+
+    def initFiles(self, num):
+        self.cleanFileDirectory()
+        for i in range(0, num):
+            if not self.getDirectoryPath().exists():
+                os.mkdir(self.getDirectoryPath())
+            with self.getDirectoryPath().joinpath(str(i)).open('wb') as file:
+                file.write(bytes(('Peer test File' + str(i)) * 100, 'utf-8'))
+
+    def cleanFileDirectory(self):
+        shutil.rmtree(self.getDirectoryPath())
 
     def createFileIndexResponse(self, fileName):
         if self.isFileIndexServer:

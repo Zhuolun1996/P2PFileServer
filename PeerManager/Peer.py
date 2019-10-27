@@ -23,14 +23,17 @@ class Peer(Server, Client):
                         self.messageSent, self.messageReceived, self.bytesSent, self.bytesReceived,
                         self.avgResponseTime, isFileIndexServer, isCentralized)
         if(isFileIndexServer and isCentralized):
-            self.dnsServer.updateIndexServer(self.address)
+            self.dnsServer.updateIndexServerAddress(self.address)
+            self.dnsServer.indexServer = self
 
-    def startPeer(self):
+    def startPeer(self, M):
         self.startServer()
         if(not self.isCentralized):
             self.requestJoinNetwork(self.dnsServer)
             self.requestFindIndexServer()
         self.initPeerAddress()
+        if not (self.isCentralized and self.isFileIndexServer):
+            self.initFiles(M)
         self.initFileIndex()
 
     def shutdownPeer(self):

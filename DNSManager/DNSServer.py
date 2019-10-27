@@ -1,13 +1,14 @@
 class DNSServer:
     def __init__(self):
         self.peerList = list()
-        self.indexServer = tuple()
+        self.indexServerAddress = tuple()
+        self.indexServer = None
 
     def getFileIndexServerAddress(self):
-        return self.indexServer
+        return self.indexServerAddress
 
-    def updateIndexServer(self, address):
-        self.indexServer = address
+    def updateIndexServerAddress(self, address):
+        self.indexServerAddress = address
 
     def simulateARPAndPortScan(self):
         return self.peerList
