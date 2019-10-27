@@ -14,7 +14,7 @@ from Util.downloadThread import downloadThread
 
 class Client:
     def __init__(self, id, name, address, peerList, dnsServer, cachedIndexServer, messageSent, messageReceived,
-                 bytesSent, bytesReceived, avgResponseTime, isFileIndexServer, isCentralized):
+                 bytesSent, bytesReceived, avgResponseTime, isFileIndexServer, isCentralized, isTest, output):
         self.id = id
         self.name = name
         self.address = address
@@ -28,6 +28,8 @@ class Client:
         self.avgResponseTime = avgResponseTime
         self.isFileIndexServer = isFileIndexServer
         self.isCentralized = isCentralized
+        self.isTest = isTest
+        self.output = output
 
     def sendMessage(self, address, message):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -37,7 +39,8 @@ class Client:
                 startTime = time.time()
             except:
                 raise Exception('sent message fail')
-            print("Client {} send: {} to {}".format(self.id, message, str(address)))
+            if self.output == 'debug':
+                print("Client {} send: {} to {}".format(self.id, message, str(address)))
             sock.settimeout(0.5)
             try:
                 response = str(SocketMessageManager.recvMessage(sock, self.messageReceived, self.bytesReceived),
@@ -45,13 +48,16 @@ class Client:
                 statisticHelper.computeAverageResponseTime(startTime, self.avgResponseTime, self.messageSent)
             except socket.timeout:
                 print("Peer {} timeout".format(address))
-            print("Client {} Received: {}".format(self.id, response))
+            if self.output == 'debug':
+                print("Client {} Received: {}".format(self.id, response))
             return response
 
     def getDirectoryPath(self):
         return Path('./Files/' + str(self.id))
 
     def initFileIndex(self):
+        if not Path('./Files/').exists():
+            os.mkdir(Path('./Files/'))
         directory = self.getDirectoryPath()
         if not directory.exists():
             os.mkdir(directory)
@@ -62,7 +68,7 @@ class Client:
         return self.requestUpdatePeerAddress()
 
     def requestFileIndex(self, fileName):
-        if (self.isCentralized):
+        if self.isCentralized:
             indexServerAddress = self.dnsServer.getFileIndexServerAddress()
         else:
             indexServerAddress = self.cachedIndexServer[0][1]
@@ -73,7 +79,7 @@ class Client:
         return self.sendMessage(targetPeerAddress, RequestAssembler.assembleDownloadRequest(fileName, index, chunks))
 
     def requestUpdateFileIndex(self, fileName, fileMd5):
-        if (self.isCentralized):
+        if self.isCentralized:
             indexServerAddress = self.dnsServer.getFileIndexServerAddress()
         else:
             indexServerAddress = self.cachedIndexServer[0][1]
@@ -81,7 +87,7 @@ class Client:
                                 RequestAssembler.assembleUpdateFileIndexRequest(fileName, fileMd5, self.id))
 
     def requestUpdatePeerAddress(self):
-        if (self.isCentralized):
+        if self.isCentralized:
             indexServerAddress = self.dnsServer.getFileIndexServerAddress()
         else:
             indexServerAddress = self.cachedIndexServer[0][1]
@@ -106,7 +112,7 @@ class Client:
         indexServerCounter = Counter()
         for response in responseList:
             if response['head'] == 'FindIndexServerResponse' and response['result'] == True:
-                indexServerCounter[str((response['PeerId'],response['address']))] += 1
+                indexServerCounter[str((response['PeerId'], response['address']))] += 1
         if len(indexServerCounter) > 0:
             _cachedAddress = list(literal_eval(sorted(indexServerCounter)[0]))
             _cachedAddress[1] = tuple(_cachedAddress[1])
@@ -115,7 +121,8 @@ class Client:
         else:
             self.cachedIndexServer[0] = (self.id, self.address)
             self.isFileIndexServer = True
-        print('Update Cached Index Server to {}'.format(self.cachedIndexServer[0]))
+        if self.output == 'clean' or self.output == 'debug':
+            print('Update Cached Index Server to {}'.format(self.cachedIndexServer[0]))
 
     def requestIndexServerFromPeer(self, address):
         return self.sendMessage(address, RequestAssembler.assembleFindIndexServerRequest())
@@ -141,13 +148,11 @@ class Client:
                     print('file Already Exists')
                     return True
                 else:
-                    print('start download')
                     self.downloadFromPeers(fileName, fileMd5, chunks, peerSet, targetFilePath)
         else:
             self.downloadFromPeers(fileName, fileMd5, chunks, peerSet, targetFilePath)
 
     def downloadFromPeers(self, fileName, fileMd5, chunks, peerSet, targetFilePath):
-        print('start download')
         cachedFileChunks = list()
         downloadThreadList = list()
         fileChunks = list()
@@ -160,7 +165,8 @@ class Client:
             _thread.start()
         for _thread in downloadThreadList:
             _thread.join()
-        print(cachedFileChunks)
+        if self.output == 'clean' or self.output == 'debug':
+            print('cached file chunks: ', cachedFileChunks)
         for cachedChunk in cachedFileChunks:
             response = json.loads(cachedChunk)
             if response['head'] == 'errorResponse':
@@ -172,8 +178,9 @@ class Client:
                 file.write(item)
         with targetFilePath.open('rb') as file:
             verifyMd5 = hashlib.md5(file.read()).hexdigest()
-            print(verifyMd5)
-            print(fileMd5)
+            print('downloaded file: ', fileName)
+            print('downloaded file\'s MD5: ', verifyMd5)
+            print('original file\'s MD5: ', fileMd5)
             if verifyMd5 == fileMd5:
                 return True
             raise Exception('download File')

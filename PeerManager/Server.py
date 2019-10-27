@@ -19,7 +19,8 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         data = str(SocketMessageManager.recvMessage(self.request, self.server.getP2PServer().messageSent,
                                                     self.server.getP2PServer().bytesSent), 'utf-8')
         startTime = time.time()
-        print("Server {} Received: {}".format(self.server.getP2PServer().id, data))
+        if self.server.getP2PServer().output == 'debug':
+            print("Server {} Received: {}".format(self.server.getP2PServer().id, data))
         response = self.processRequest(json.loads(data), self.server.getP2PServer())
         self.request.settimeout(0.5)
         try:
@@ -30,7 +31,8 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                                                        self.server.getP2PServer().messageSent)
         except socket.timeout:
             print("Peer {} timeout".format(self.request.address))
-        print("Server {} send: {}".format(self.server.getP2PServer().id, response))
+        if self.server.getP2PServer().output == 'debug':
+            print("Server {} send: {}".format(self.server.getP2PServer().id, response))
 
     def processRequest(self, request, server):
         requestHead = request['head']
@@ -69,7 +71,7 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 class Server:
     def __init__(self, id, name, address, peerList, dnsServer, cachedIndexServer, messageSent, messageReceived,
-                 bytesSent, bytesReceived, avgResponseTime, isFileIndexServer, isCentralized):
+                 bytesSent, bytesReceived, avgResponseTime, isFileIndexServer, isCentralized, isTest, output):
         self.id = id
         self.name = name
         self.address = address
@@ -83,6 +85,8 @@ class Server:
         self.bytesReceived = bytesReceived
         self.avgResponseTime = avgResponseTime
         self.isCentralized = isCentralized
+        self.isTest = isTest
+        self.output = output
         self.fileIndexTable = dict()
         self.peerFileTable = dict()
         self.fileMd5Table = dict()
@@ -113,16 +117,19 @@ class Server:
     def getDirectoryPath(self):
         return Path('./Files/' + str(self.id))
 
-    def initFiles(self, num):
-        self.cleanFileDirectory()
+    def initFiles(self, num, length):
         for i in range(0, num):
             if not self.getDirectoryPath().exists():
                 os.mkdir(self.getDirectoryPath())
             with self.getDirectoryPath().joinpath(str(i)).open('wb') as file:
-                file.write(bytes(('Peer test File' + str(i)) * 100, 'utf-8'))
+                file.write(bytes(('Peer test File' + str(i)) * length, 'utf-8'))
 
     def cleanFileDirectory(self):
-        shutil.rmtree(self.getDirectoryPath())
+        try:
+            shutil.rmtree(self.getDirectoryPath())
+            print('clean directory success')
+        except:
+            print('clean directory fail')
 
     def createFileIndexResponse(self, fileName):
         if self.isFileIndexServer:
@@ -146,9 +153,11 @@ class Server:
                     endIndex = len(fileContent)
                 if index == chunks - 1:
                     endIndex = len(fileContent)
-                print('request file chunk: ', index)
-                print('file Length: ', len(fileContent))
-                print('download piece: ', startIndex, endIndex)
+                if self.output == 'clean' or self.output == 'debug':
+                    print('====================================')
+                    print(
+                        'download from peer {} for file {} \nrequest file chunk: {} \nfile Length: {} \ndownload piece from: {} to {} \n====================================\n'.format(
+                            self.id, fileName, index, len(fileContent), startIndex, endIndex))
                 returnContent = fileContent[startIndex:endIndex]
                 return ResponseAssembler.assembleDownloadResponse(fileName, index, chunks,
                                                                   hashlib.md5(returnContent).hexdigest(),
@@ -170,10 +179,11 @@ class Server:
                 self.peerFileTable[peerId] = set()
                 self.peerFileTable[peerId].add(fileName)
             self.fileMd5Table[fileName] = fileMd5
-            print(self.peerFileTable)
-            print(self.peerAddressTable)
-            print(self.fileIndexTable)
-            print(self.fileMd5Table)
+            if self.output == 'debug':
+                print('peer file table: ', self.peerFileTable)
+                print('peer address table: ', self.peerAddressTable)
+                print('file index table: ', self.fileIndexTable)
+                print('file md5 table: ', self.fileMd5Table)
             return ResponseAssembler.assembleUpdateFileIndexResponse(fileName, fileMd5, True)
         except:
             return ResponseAssembler.assembleErrorResponse('updateFileIndexError')

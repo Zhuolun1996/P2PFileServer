@@ -3,7 +3,7 @@ from PeerManager.Server import Server
 
 
 class Peer(Server, Client):
-    def __init__(self, id, name, host, port, dnsServer, isFileIndexServer=False, isCentralized=False):
+    def __init__(self, id, name, host, port, dnsServer, isFileIndexServer=False, isCentralized=False, isTest=False, output='clean'):
         self.id = id
         self.name = name
         self.address = (host, port)
@@ -15,25 +15,29 @@ class Peer(Server, Client):
         self.bytesSent = [0]
         self.bytesReceived = [0]
         self.avgResponseTime = [0]
+        self.isFileIndexServer = isFileIndexServer
         self.isCentralized = isCentralized
-        Server.__init__(self, id, name, self.address, self.peerList, dnsServer, self.cachedIndexServer,
+        self.isTest = isTest
+        self.output = output
+        Server.__init__(self, self.id, self.name, self.address, self.peerList, self.dnsServer, self.cachedIndexServer,
                         self.messageSent, self.messageReceived, self.bytesSent, self.bytesReceived,
-                        self.avgResponseTime, isFileIndexServer, isCentralized)
-        Client.__init__(self, id, name, self.address, self.peerList, dnsServer, self.cachedIndexServer,
+                        self.avgResponseTime, self.isFileIndexServer, self.isCentralized, self.isTest, self.output)
+        Client.__init__(self, self.id, self.name, self.address, self.peerList, self.dnsServer, self.cachedIndexServer,
                         self.messageSent, self.messageReceived, self.bytesSent, self.bytesReceived,
-                        self.avgResponseTime, isFileIndexServer, isCentralized)
-        if(isFileIndexServer and isCentralized):
+                        self.avgResponseTime, self.isFileIndexServer, self.isCentralized, self.isTest, self.output)
+        if(self.isFileIndexServer and self.isCentralized):
             self.dnsServer.updateIndexServerAddress(self.address)
             self.dnsServer.indexServer = self
 
-    def startPeer(self, M):
+    def startPeer(self, M, L):
         self.startServer()
         if(not self.isCentralized):
             self.requestJoinNetwork(self.dnsServer)
             self.requestFindIndexServer()
         self.initPeerAddress()
-        if not (self.isCentralized and self.isFileIndexServer):
-            self.initFiles(M)
+        self.cleanFileDirectory()
+        if not (self.isCentralized and self.isFileIndexServer) and not self.isTest:
+            self.initFiles(M, L)
         self.initFileIndex()
 
     def shutdownPeer(self):

@@ -38,6 +38,8 @@ def main():
     parser.add_argument('-N', '--requests', help='Number of Requests', type=int, required=True)
     parser.add_argument('-F', '--frequency', help='Request Frequency', type=float, required=True)
     parser.add_argument('-C', '--centralized', help='Centralized Network: T or F', type=str, required=True)
+    parser.add_argument('-L', '--length', help='File Length', type=int, required=True)
+    parser.add_argument('-O', '--output', help='enable message output: clean || debug || false', type=str, required=True)
 
     args = parser.parse_args()
     print(args)
@@ -46,34 +48,41 @@ def main():
     REQUESTS = args.requests
     FREQUENCY = args.frequency
     CENTRALIZED = args.centralized == 'T'
+    LENGTH = args.length
+    OUTPUT = args.output
 
     peerList = list()
     dnsServer = DNSServer()
-
-    if (CENTRALIZED):
-        indexServer = Peer(10000, 'indexServer', '127.0.0.1', 10000, dnsServer, True, CENTRALIZED)
-        indexServer.startPeer(FILES)
-
-    for i in range(0, PEERS):
-        peerList.append(Peer(i, 'peer' + str(i), '127.0.0.1', 8000 + i, dnsServer, False, CENTRALIZED))
-
-    for peer in peerList:
-        peer.startPeer(FILES)
-
-    testPeer = Peer(1000, 'testPeer', '127.0.0.1', 9000, dnsServer, False, CENTRALIZED)
-
     try:
+        if (CENTRALIZED):
+            indexServer = Peer(10000, 'indexServer', '127.0.0.1', 10000, dnsServer, True, CENTRALIZED, False, OUTPUT)
+            indexServer.startPeer(FILES, LENGTH)
+
+        for i in range(0, PEERS):
+            peerList.append(Peer(i, 'peer' + str(i), '127.0.0.1', 8000 + i, dnsServer, False, CENTRALIZED, False, OUTPUT))
+
+        for peer in peerList:
+            peer.startPeer(FILES, LENGTH)
+
+        testPeer = Peer(1000, 'testPeer', '127.0.0.1', 9000, dnsServer, False, CENTRALIZED, True, OUTPUT)
+        testPeer.startPeer(FILES, LENGTH)
+
         for i in range(REQUESTS):
-            testPeer.downloadFile(i % FILES)
+            testPeer.downloadFile(str(i % FILES))
             time.sleep(FREQUENCY)
+    except OSError:
+        print('wait until OS release ports')
+
     finally:
         if (CENTRALIZED):
-            dnsServer.indexServer.printStatistic()
+            indexServer.printStatistic()
         for peer in peerList:
             peer.printStatistic()
         for peer in peerList:
             peer.shutdownPeer()
-
+        if (CENTRALIZED):
+            indexServer.shutdownPeer()
+        testPeer.shutdownPeer()
 
 if __name__ == "__main__":
     main()
