@@ -72,10 +72,6 @@ def autoTest(parameters):
         print('avg bytes recv: ', data.getAvgBytesReceivedData())
         print('avg response time: ', data.getAvgAvgResponseTimeData())
 
-
-    except OSError:
-        print('wait until OS release ports')
-
     finally:
         for peer in peerList:
             peer.shutdownPeer()
