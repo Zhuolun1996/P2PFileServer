@@ -1,6 +1,5 @@
 import argparse
 import time
-import statistics
 from PeerManager.Peer import Peer
 from DNSManager.DNSServer import DNSServer
 from Util.testData import testData
@@ -12,8 +11,8 @@ def main():
     parser.add_argument('-M', '--files', help='Number of Files', type=int, required=True)
     parser.add_argument('-N', '--requests', help='Number of Requests', type=int, required=True)
     parser.add_argument('-F', '--frequency', help='Request Frequency', type=float, required=True)
-    parser.add_argument('-C', '--centralized', help='Centralized Network: T or F', type=str, required=True)
     parser.add_argument('-L', '--length', help='File Length', type=int, required=True)
+    parser.add_argument('-C', '--centralized', help='Centralized Network: T or F', type=str, required=True)
     parser.add_argument('-O', '--output', help='enable message output: clean || debug || false', type=str,
                         required=True)
     args = parser.parse_args()

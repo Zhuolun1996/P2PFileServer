@@ -7,28 +7,29 @@ from DNSManager.DNSServer import DNSServer
 from Util.testData import testData
 
 
-def autoTest(P, M, N, F, C, L, O):
-    PEERS = P
-    FILES = M
-    REQUESTS = N
-    FREQUENCY = F
-    CENTRALIZED = C
-    LENGTH = L
-    OUTPUT = O
-
-    peerList = list()
-    dnsServer = DNSServer()
-
-    messageSentData = list()
-    messageReceivedData = list()
-    bytesSentData = list()
-    bytesReceivedData = list()
-    avgResponseTimeData = list()
-
+def autoTest(parameters):
     try:
+        PEERS = parameters[0]
+        FILES = parameters[1]
+        REQUESTS = parameters[2]
+        FREQUENCY = parameters[3]
+        CENTRALIZED = parameters[4]
+        LENGTH = parameters[5]
+        OUTPUT = parameters[6]
+
+        peerList = list()
+        dnsServer = DNSServer()
+
+        messageSentData = list()
+        messageReceivedData = list()
+        bytesSentData = list()
+        bytesReceivedData = list()
+        avgResponseTimeData = list()
+
         # init centralized server if is centralized mode
         if (CENTRALIZED):
-            indexServer = Peer(10000, 'indexServer', '127.0.0.1', 60000, dnsServer, True, CENTRALIZED, False, OUTPUT)
+            indexServer = Peer(10000, 'indexServer', '127.0.0.1', 60000, dnsServer, True, CENTRALIZED, False,
+                               OUTPUT)
             indexServer.startPeer(FILES, LENGTH)
 
         # init peers
@@ -48,16 +49,30 @@ def autoTest(P, M, N, F, C, L, O):
             testPeer.downloadFile(str(i % FILES))
             time.sleep(1 / FREQUENCY)
 
-        if (CENTRALIZED):
-            indexServer.recordStatistic(messageSentData, messageReceivedData, bytesSentData, bytesReceivedData,
-                                        avgResponseTimeData)
+
         for peer in peerList:
             peer.recordStatistic(messageSentData, messageReceivedData, bytesSentData, bytesReceivedData,
                                  avgResponseTimeData)
+        if (CENTRALIZED):
+            indexServer.recordStatistic(messageSentData, messageReceivedData, bytesSentData, bytesReceivedData,
+                                        avgResponseTimeData)
         testPeer.recordStatistic(messageSentData, messageReceivedData, bytesSentData, bytesReceivedData,
                                  avgResponseTimeData)
+
         data = testData(messageSentData, messageReceivedData, bytesSentData, bytesReceivedData, avgResponseTimeData)
-        return data
+
+        makePlot(data.messageSentData, 'message sent' + str(parameters), CENTRALIZED)
+        makePlot(data.messageReceivedData, 'message received' + str(parameters), CENTRALIZED)
+        makePlot(data.bytesSentData, 'bytes sent' + str(parameters), CENTRALIZED)
+        makePlot(data.bytesReceivedData, 'bytes received' + str(parameters), CENTRALIZED)
+        makePlot(data.avgResponseTimeData, 'average time' + str(parameters), CENTRALIZED)
+
+        print('avg message sent: ', data.getAvgMessageSentData())
+        print('avg message recv: ', data.getAvgMessageReceivedData())
+        print('avg bytes sent: ', data.getAvgBytesSentData())
+        print('avg bytes recv: ', data.getAvgBytesReceivedData())
+        print('avg response time: ', data.getAvgAvgResponseTimeData())
+
 
     except OSError:
         print('wait until OS release ports')
@@ -70,17 +85,13 @@ def autoTest(P, M, N, F, C, L, O):
         testPeer.shutdownPeer()
 
 
-def makePlot():
-    O = 'false'
-    C1 = 'T'
-    C2 = 'F'
-    P1 = 1
-    M1 = 1
-    N1 = 1
-    F1 = 1
-    L1 = 1
-
-    # Ptest = 10
-    data = autoTest(P1, M1, N1, F1, C1, L1, O)
-    l1 = plt.plot(np.arange(1,11), data.messageSentData, 'r--', label='inner test')
+def makePlot(plotData, name, isCentralized):
+    plt.figure()
+    plt.plot(np.arange(1, len(plotData)+1), plotData, label=name)
     plt.legend()
+    plt.savefig(name + '.png')
+
+
+
+parameters = [4, 2, 1, 10, 'T', 5, 'false']
+autoTest(parameters)

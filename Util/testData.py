@@ -1,7 +1,7 @@
 import statistics
 import copy
 class testData:
-    def __init__(self,messageSentData, messageReceivedData, bytesSentData, bytesReceivedData, avgResponseTimeData):
+    def __init__(self, messageSentData, messageReceivedData, bytesSentData, bytesReceivedData, avgResponseTimeData):
         self.messageSentData = copy.deepcopy(messageSentData)
         self.messageReceivedData = copy.deepcopy(messageReceivedData)
         self.bytesSentData = copy.deepcopy(bytesSentData)

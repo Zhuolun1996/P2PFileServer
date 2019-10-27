@@ -129,6 +129,7 @@ class Server:
         :return:
         '''
         self.server.shutdown()
+        self.server.server_close()
         print("Server" + str(self.id) + " shutdown")
 
     def getServer(self):
