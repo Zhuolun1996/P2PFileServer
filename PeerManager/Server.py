@@ -14,10 +14,10 @@ from pathlib import Path
 
 
 class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
-
     '''
     Handler to process TCP connection
     '''
+
     def handle(self):
         '''
         Process coming in TCP message and send response
@@ -25,7 +25,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         '''
         data = str(SocketMessageManager.recvMessage(self.request, self.server.getP2PServer().messageSent,
                                                     self.server.getP2PServer().bytesSent), 'utf-8')
-        startTime = time.time()
+        startTime = time.time_ns() // 1000000
         if self.server.getP2PServer().output == 'debug':
             print("Server {} Received: {}".format(self.server.getP2PServer().id, data))
         response = self.processRequest(json.loads(data), self.server.getP2PServer())
@@ -40,7 +40,6 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
             print("Peer {} timeout".format(self.request.address))
         if self.server.getP2PServer().output == 'debug':
             print("Server {} send: {}".format(self.server.getP2PServer().id, response))
-
 
     def processRequest(self, request, server):
         '''
@@ -87,6 +86,7 @@ class Server:
     '''
     Server class
     '''
+
     def __init__(self, id, name, address, peerList, dnsServer, cachedIndexServer, messageSent, messageReceived,
                  bytesSent, bytesReceived, avgResponseTime, isFileIndexServer, isCentralized, isTest, output):
         self.id = id

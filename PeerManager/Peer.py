@@ -69,4 +69,4 @@ class Peer(Server, Client):
         print('Peer {} Message Received: {}'.format(self.id, self.messageReceived[0]))
         print('Peer {} Bytes Sent: {}'.format(self.id, self.bytesSent[0]))
         print('Peer {} Bytes Received: {}'.format(self.id, self.bytesReceived[0]))
-        print('Peer {} Average Response Time: {}'.format(self.id, self.avgResponseTime[0]))
+        print('Peer {} Average Response Time: {} milliseconds'.format(self.id, self.avgResponseTime[0]))

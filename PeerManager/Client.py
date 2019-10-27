@@ -45,7 +45,7 @@ class Client:
             sock.connect(address)
             try:
                 SocketMessageManager.sendMessage(sock, bytes(message, 'utf-8'), self.messageSent, self.bytesSent)
-                startTime = time.time()
+                startTime = time.time_ns() // 1000000
             except:
                 raise Exception('sent message fail')
             if self.output == 'debug':
